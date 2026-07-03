@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Attendance: any signed-in user can read today's ledger,
+    // but can only ever create/write their OWN check-in document,
+    // and only once (no edits after creation, no deleting).
+    match /attendance/{entryId} {
+      allow read: if request.auth != null;
+
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && entryId == request.resource.data.dateKey + "_" + request.auth.uid;
+
+      allow update, delete: if false;
+    }
+  }
+}
