@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Daily Attendance Register</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #E7E2D3;
+    --paper-2: #DED8C4;
+    --ink: #1B1B1F;
+    --ink-soft: #4A473E;
+    --stamp-red: #B23A2E;
+    --brass: #A9862B;
+    --line: #C9C2AC;
+    --card: #F3F0E6;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at top left, rgba(169,134,43,0.08), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(178,58,46,0.06), transparent 55%),
+      var(--paper);
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 16px;
+  }
+  .register{
+    width:100%;
+    max-width:640px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.03), 0 20px 40px -24px rgba(27,27,31,0.35);
+    position:relative;
+    overflow:hidden;
+  }
+  .register::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:6px;
+    background: repeating-linear-gradient(90deg, var(--brass) 0 14px, transparent 14px 20px);
+    opacity:0.55;
+  }
+  header{
+    padding:36px 40px 22px;
+    border-bottom:1px dashed var(--line);
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--brass);
+    margin:0 0 10px;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:32px;
+    line-height:1.1;
+    margin:0 0 6px;
+    letter-spacing:-0.01em;
+  }
+  .date-line{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .body-pad{ padding:28px 40px 36px; }
+
+  /* --- Sign in state --- */
+  .signin-panel{
+    text-align:center;
+    padding:20px 0 4px;
+  }
+  .signin-panel p{
+    color:var(--ink-soft);
+    font-size:14.5px;
+    line-height:1.6;
+    max-width:400px;
+    margin:0 auto 26px;
+  }
+  .g-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:var(--ink);
+    color:#F3F0E6;
+    border:none;
+    border-radius:3px;
+    padding:13px 24px;
+    font-family:'Inter', sans-serif;
+    font-size:14.5px;
+    font-weight:500;
+    cursor:pointer;
+    transition:transform 0.15s ease, background 0.15s ease;
+  }
+  .g-btn:hover{ background:#000; transform:translateY(-1px); }
+  .g-btn svg{ width:18px; height:18px; }
+
+  /* --- Signed in state --- */
+  .who{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:22px;
+  }
+  .who img{
+    width:48px;height:48px;border-radius:50%;
+    border:2px solid var(--paper-2);
+  }
+  .who-name{ font-weight:600; font-size:15.5px; }
+  .who-email{ font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); }
+  .signout{
+    margin-left:auto;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    background:none;
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:7px 12px;
+    cursor:pointer;
+  }
+  .signout:hover{ border-color:var(--ink-soft); color:var(--ink); }
+
+  .checkin-box{
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:22px;
+    background:repeating-linear-gradient(180deg, transparent 0 31px, var(--line) 31px 32px);
+    background-color: rgba(255,255,255,0.25);
+    position:relative;
+    min-height:120px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .checkin-btn{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:19px;
+    background:var(--stamp-red);
+    color:#F3F0E6;
+    border:none;
+    border-radius:3px;
+    padding:16px 34px;
+    cursor:pointer;
+    letter-spacing:0.02em;
+    box-shadow: 0 6px 14px -6px rgba(178,58,46,0.55);
+    transition:transform 0.12s ease;
+  }
+  .checkin-btn:hover{ transform:translateY(-2px) scale(1.01); }
+  .checkin-btn:disabled{ opacity:0.5; cursor:default; transform:none; }
+
+  .stamp{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:26px;
+    color:var(--stamp-red);
+    border:3px solid var(--stamp-red);
+    border-radius:6px;
+    padding:10px 22px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    transform:rotate(-6deg) scale(0.6);
+    opacity:0;
+    animation: stampIn 0.35s cubic-bezier(.2,1.4,.4,1) forwards;
+  }
+  .stamp small{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:0.08em;
+    margin-top:4px;
+  }
+  @keyframes stampIn{
+    0%{ opacity:0; transform:rotate(-6deg) scale(0.5); }
+    60%{ opacity:1; transform:rotate(-6deg) scale(1.08); }
+    100%{ opacity:1; transform:rotate(-6deg) scale(1); }
+  }
+
+  .ledger-title{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    color:var(--ink-soft);
+    margin:30px 0 12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .ledger-title::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+  .entries{ display:flex; flex-direction:column; gap:0; }
+  .entry{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 0;
+    border-bottom:1px dotted var(--line);
+    font-size:14px;
+  }
+  .entry:last-child{ border-bottom:none; }
+  .entry img{
+    width:28px;height:28px;border-radius:50%;
+    flex-shrink:0;
+  }
+  .entry-name{ font-weight:500; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .entry-time{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--brass);
+  }
+  .empty-note{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    padding:14px 0;
+  }
+  .footnote{
+    margin-top:26px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    text-align:center;
+  }
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="register">
+  <header>
+    <p class="eyebrow">Attendance Register</p>
+    <h1>Sign in, check in.</h1>
+    <p class="date-line" id="todayLine">—</p>
+  </header>
+
+  <div class="body-pad">
+
+    <!-- Signed OUT view -->
+    <div id="signinPanel" class="signin-panel">
+      <p>Sign in with your Google account to record today's attendance. One tap, one entry per day.</p>
+      <button class="g-btn" id="googleBtn">
+        <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 7 29.6 5 24 5 16 5 9.1 9.6 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.2-5.1l-6.6-5.6C29.6 35.4 26.9 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9 39.4 15.9 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.6 5.6C39.9 37 44 31.4 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        Continue with Google
+      </button>
+    </div>
+
+    <!-- Signed IN view -->
+    <div id="appPanel" class="hidden">
+      <div class="who">
+        <img id="userPhoto" src="" alt="">
+        <div>
+          <div class="who-name" id="userName">—</div>
+          <div class="who-email" id="userEmail">—</div>
+        </div>
+        <button class="signout" id="signoutBtn">Sign out</button>
+      </div>
+
+      <div class="checkin-box" id="checkinBox">
+        <button class="checkin-btn" id="checkinBtn">Check In Now</button>
+      </div>
+
+      <div class="ledger-title">Today's entries</div>
+      <div class="entries" id="entries">
+        <div class="empty-note">No one has checked in yet today.</div>
+      </div>
+
+      <div class="footnote">Records are timestamped and stored per calendar day. Duplicate check-ins for the same day are ignored.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Firebase (compat SDK) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCk-9btSBih9tqB0bnrt-PIAHJH8GpkwvE",
+    authDomain: "who-r-you-d15ff.firebaseapp.com",
+    projectId: "who-r-you-d15ff",
+    storageBucket: "who-r-you-d15ff.firebasestorage.app",
+    messagingSenderId: "191405162194",
+    appId: "1:191405162194:web:82e7852898b1107107370b"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+
+  db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+
+  function todayKey(d = new Date()){
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  function prettyDate(d = new Date()){
+    return d.toLocaleDateString(undefined, { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  }
+  function prettyTime(d){
+    return d.toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' });
+  }
+
+  document.getElementById('todayLine').textContent = prettyDate();
+
+  const signinPanel = document.getElementById('signinPanel');
+  const appPanel = document.getElementById('appPanel');
+  const googleBtn = document.getElementById('googleBtn');
+  const signoutBtn = document.getElementById('signoutBtn');
+  const checkinBtn = document.getElementById('checkinBtn');
+  const checkinBox = document.getElementById('checkinBox');
+  const entriesEl = document.getElementById('entries');
+
+  googleBtn.addEventListener('click', () => {
+    auth.signInWithPopup(provider).catch(err => {
+      alert('Sign-in failed: ' + err.message);
+    });
+  });
+
+  signoutBtn.addEventListener('click', () => auth.signOut());
+
+  let unsubscribeEntries = null;
+  let currentUser = null;
+
+  auth.onAuthStateChanged(async (user) => {
+    currentUser = user;
+    if (user) {
+      signinPanel.classList.add('hidden');
+      appPanel.classList.remove('hidden');
+      document.getElementById('userPhoto').src = user.photoURL || '';
+      document.getElementById('userName').textContent = user.displayName || 'Signed in';
+      document.getElementById('userEmail').textContent = user.email || '';
+      await refreshCheckinState();
+      listenToEntries();
+    } else {
+      signinPanel.classList.remove('hidden');
+      appPanel.classList.add('hidden');
+      if (unsubscribeEntries) { unsubscribeEntries(); unsubscribeEntries = null; }
+    }
+  });
+
+  async function refreshCheckinState(){
+    const key = todayKey();
+    const docId = `${key}_${currentUser.uid}`;
+    const existing = await db.collection('attendance').doc(docId).get();
+    if (existing.exists) {
+      const t = existing.data().timestamp?.toDate ? existing.data().timestamp.toDate() : new Date();
+      renderStamp(t);
+    } else {
+      checkinBox.innerHTML = '<button class="checkin-btn" id="checkinBtn">Check In Now</button>';
+      document.getElementById('checkinBtn').addEventListener('click', doCheckin);
+    }
+  }
+
+  function renderStamp(time){
+    checkinBox.innerHTML = `<div class="stamp">Present<small>${prettyTime(time)}</small></div>`;
+  }
+
+  checkinBtn.addEventListener('click', doCheckin);
+
+  async function doCheckin(){
+    if (!currentUser) return;
+    const btn = document.getElementById('checkinBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Recording…'; }
+
+    const key = todayKey();
+    const docId = `${key}_${currentUser.uid}`;
+    const now = new Date();
+
+    try {
+      await db.collection('attendance').doc(docId).set({
+        uid: currentUser.uid,
+        name: currentUser.displayName || '',
+        email: currentUser.email || '',
+        photoURL: currentUser.photoURL || '',
+        dateKey: key,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: false });
+      renderStamp(now);
+    } catch (err) {
+      alert('Could not record check-in: ' + err.message);
+      if (btn) { btn.disabled = false; btn.textContent = 'Check In Now'; }
+    }
+  }
+
+  function listenToEntries(){
+    const key = todayKey();
+    if (unsubscribeEntries) unsubscribeEntries();
+    unsubscribeEntries = db.collection('attendance')
+      .where('dateKey', '==', key)
+      .orderBy('timestamp', 'asc')
+      .onSnapshot(snap => {
+        if (snap.empty) {
+          entriesEl.innerHTML = '<div class="empty-note">No one has checked in yet today.</div>';
+          return;
+        }
+        entriesEl.innerHTML = '';
+        snap.forEach(doc => {
+          const d = doc.data();
+          const t = d.timestamp?.toDate ? d.timestamp.toDate() : new Date();
+          const row = document.createElement('div');
+          row.className = 'entry';
+          row.innerHTML = `
+            <img src="${d.photoURL || ''}" alt="">
+            <div class="entry-name">${escapeHtml(d.name || d.email || 'Unknown')}</div>
+            <div class="entry-time">${prettyTime(t)}</div>
+          `;
+          entriesEl.appendChild(row);
+        });
+      }, err => {
+        console.error('Entries listener error:', err);
+      });
+  }
+
+  function escapeHtml(str){
+    return str.replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+</script>
+</body>
+</html>
